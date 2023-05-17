@@ -38,7 +38,14 @@ module.exports = class HealthCheckModule {
     async getResponse() {
         return {
             status: await this._determineStatus(),
-            integrations: Array.from(this.integrationsMap.values())
+            integrations: Array.from(this.integrationsMap.values()).map(integration => {
+                return {
+                    ...integration,
+                    config: undefined,
+                    errors_length: integration.errors.length,
+                    errors: undefined
+                }
+            })
         };
     }
 
