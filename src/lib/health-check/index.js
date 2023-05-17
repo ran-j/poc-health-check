@@ -82,11 +82,11 @@ module.exports = class HealthCheckModule {
                 return resolve();
             }
 
-            const totalErrorInMs = integration.errors[0].timestamp - integration.errors[integration.errors.length - 1].timestamp;
+            const totalErrorInMs = integration.errors[0].timestamp - Date.now();
             const totalErrorInMinutes = totalErrorInMs / 60000;
 
             const errorCount = integration.errors.length;
-            const errorPerMinute = errorCount / Math.max(totalErrorInMinutes, 1);
+            const errorPerMinute = Math.min(errorCount / totalErrorInMinutes, 0);
 
             if (errorPerMinuteToFailState !== -1) {
                 if (errorPerMinute >= errorPerMinuteToFailState) {
