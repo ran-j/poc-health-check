@@ -81,39 +81,34 @@ module.exports = class HealthCheckModule {
 
     _checkIntegration(integration) {
         return new Promise((resolve) => {
-            const { errorPerMinuteToFailState, errorPerMinuteToWarnState } = integration.config;
+            const { errorPerIntervalToFailState, errorPerIntervalToWarnState, errorMinuteInterval } = integration.config;
 
             this.setIntegrationStatus(integration.name, 'pass');
 
             if (integration.errors.length === 0) {
                 return resolve();
             }
-
-            const totalErrorInMs = Math.abs(Date.now() - integration.errors[0].timestamp);
-            const totalErrorInMinutes = totalErrorInMs / 60000;
-
-            const errorCount = integration.errors.length;
-            const errorPerMinute = Math.floor(errorCount / totalErrorInMinutes, 0);
-
-            if (errorPerMinuteToFailState !== -1) {
-                if (errorPerMinute >= errorPerMinuteToFailState) {
-                    this.setIntegrationStatus(integration.name, 'fail');
-                    return resolve();
+ 
+            const now = Date.now();
+            const fiveMinutesAgo = now - (errorMinuteInterval * 60000);
+            const errorCount = integration.errors.reduce((acc, curr) => {
+                if (curr.timestamp > fiveMinutesAgo) {
+                    acc++;
                 }
+                return acc;
+            }, 0)
 
-                if (errorPerMinuteToFailState === 0 && errorCount > 0) {
+            if (errorPerIntervalToFailState !== -1) {
+                if (errorCount >= errorPerIntervalToFailState || errorPerIntervalToFailState === 0 && errorCount > 0) {
                     this.setIntegrationStatus(integration.name, 'fail');
                     return resolve();
                 }
             }
 
-            if (errorPerMinuteToWarnState !== -1) {
-                if (errorPerMinute >= errorPerMinuteToWarnState) {
+            if (errorPerIntervalToWarnState !== -1) {
+                if (errorCount >= errorPerIntervalToWarnState || errorPerIntervalToWarnState === 0 && errorCount > 0) {
                     this.setIntegrationStatus(integration.name, 'warn');
                     return resolve();
-                }
-                if (errorPerMinuteToWarnState === 0 && errorCount > 0) {
-                    this.setIntegrationStatus(integration.name, 'warn');
                 }
             }
 
@@ -123,8 +118,9 @@ module.exports = class HealthCheckModule {
 
     _getDefaultConfig() {
         return {
-            errorPerMinuteToFailState: 5, //0 means any, --1 means never
-            errorPerMinuteToWarnState: 0, //0 means any, -1 means never
+            errorPerIntervalToFailState: 5, //0 means any, --1 means never
+            errorPerIntervalToWarnState: 0, //0 means any, -1 means never
+            errorMinuteInterval: 5
         };
     }
 }
