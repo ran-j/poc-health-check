@@ -1,3 +1,5 @@
+//Um server simples feito com express js para testar o health check
+
 //create a express app
 const express = require('express');
 const mongoose = require('mongoose');
@@ -22,6 +24,7 @@ const Book = mongoose.model('Book', { name: String });
 
 ///////////////Server /////////////////////
 
+//instantiate the health check module
 const HealthCheck = new HealthCheckModule();
 //register the integration
 HealthCheck.registerIntegration('mongodb', 'database');
@@ -45,6 +48,7 @@ app.post('/book', async (req, res) => {
         await book.save();
         res.send('Book saved');
     } catch (error) {
+        //increment the error count
         HealthCheck.incrementIntegrationError('mongodb');
         res.status(500).send('Error');
     }
@@ -57,12 +61,14 @@ app.get('/pokemon/:name', async (req, res) => {
         const response = await axios.get(`https://pokeapi.co/api/v2/pokemon/${name}`);
         res.json(response.data);
     } catch (error) {
+        //increment the error count
         HealthCheck.incrementIntegrationError('pokemon');
         res.status(500).send('Error');
     }
 });
 
 app.get('/health', async (req, res) => {
+    //get the response
     const result = await HealthCheck.getResponse();
     res.json(result);
 })
