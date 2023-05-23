@@ -37,22 +37,21 @@ The endpoint will return a JSON response containing the health status of the app
 
 ```json
 {
-    "name": "my-project",
     "status": "healthy",
-    "timestamp": "2021-09-27T18:00:00.000Z",
     "integrations": [
         {
-            "name": "database",
             "kind": "database",
-            "errors_since_last_health_check": 0,
-            "status": "pass"
+            "optional": false,
+            "status": "pass",
+            "name": "mongodb",
+            "errors_length": 0
         },
         {
-            "name": "cache",
-            "kind": "cache",
-            "errors_since_last_health_check": 0,
+            "kind": "api",
+            "optional": false,
             "status": "pass",
-            "optional": true
+            "name": "pokemon",
+            "errors_length": 0
         }
     ]
 }
