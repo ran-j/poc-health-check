@@ -1,6 +1,6 @@
 ---
 name: Proposta de RFC
-description: Proponha uma nova solicitação de RFC
+about: Proponha uma nova solicitação de RFC
 title: "Proposta: RFC para padronização de ..."
 labels: "rfc propostal"
 assignees: ""
